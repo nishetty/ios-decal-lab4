@@ -8,14 +8,18 @@
 
 import UIKit
 
-class SearchViewController: UIViewController {
+class SearchViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
 
+    @IBOutlet weak var collectionView: UICollectionView!
+    
     var pokemonArray: [Pokemon] = []
     var filteredArray: [Pokemon] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         pokemonArray = PokemonGenerator.getPokemonArray()
+        collectionView.delegate = self
+        collectionView.dataSource = self
 
     }
 
@@ -34,6 +38,29 @@ class SearchViewController: UIViewController {
         }
         return filtered
     }
-
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return PokemonGenerator.categoryDict.count
+        }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! CustomCollectionViewCell
+        cell.imageView.image = UIImage(named: PokemonGenerator.categoryDict[indexPath.item]!)
+        
+        return cell
+        }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        filteredArray = filteredPokemon(ofType: indexPath.row)
+        
+        performSegue(withIdentifier: "searchToCategory", sender: self)
+       
+        }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let vc = segue.destination as? CategoryViewController {
+            vc.pokemonArray = filteredArray
+        }
+    }
 
 }
